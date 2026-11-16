@@ -1,7 +1,7 @@
 # I-01 · Prestar libros a socios
 
-**Estado:** BORRADOR — pendiente de ✔ del dueño de producto en Mob Elaboration
-**Apoya a:** M1, M2
+**Estado:** Aprobado
+**Apoya a:** M1, M2 (encontradas en la vision del proyecto)
 
 ## Intención
 Que la biblioteca pueda registrar sus libros, sus socios y prestar ejemplares controlando
@@ -28,5 +28,8 @@ directo a PR sin documento.
 
 ## Preguntas abiertas para el dueño de producto
 - ¿Cuántos préstamos simultáneos puede tener un socio?
+- Respuesta: varios
 - ¿Monto de la multa por día? ¿Tiene tope?
+- Respuesta: 0,75 usd  y no tiene tope
 - ¿Un socio con multa pendiente puede pedir otro préstamo?
+- no puede pedir

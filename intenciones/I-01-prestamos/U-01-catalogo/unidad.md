@@ -32,27 +32,49 @@ Respuestas del equipo (Mob Construction, 2026-11-16), citadas tal cual:
 
 ### Supuestos a confirmar al empezar cada bolt
 - S-1 (B-01): "13 digitos" se valida como exactamente 13 dígitos numéricos, sin guiones.
-  ¿Se valida también el dígito de control?
+  Resuelto 2026-11-16: "no no valides solo que tenga 13 numeros" → sin dígito de control.
 - S-2 (B-03): el código de ejemplar lo genera una secuencia de la base de datos.
 - S-3 (B-05): la baja de un libro es lógica (no se borra la fila). ¿Qué pasa si tiene ejemplares activos?
 
 ## Bolts
 
-### B-01 · Alta y consulta de libro — estado: pendiente
+### B-01 · Alta y consulta de libro — estado: en revisión
 Criterios:
-- [ ] Registrar un libro con ISBN, título y autor → 201 con su ubicación.
-- [ ] ISBN duplicado → 409 `ProblemDetail`.
-- [ ] ISBN que no tiene 13 dígitos, o título/autor vacío → 400 `ProblemDetail`.
-- [ ] Consultar un libro por id → 200; si no existe → 404 `ProblemDetail`.
+- [x] Registrar un libro con ISBN, título y autor → 201 con su ubicación.
+- [x] ISBN duplicado → 409 `ProblemDetail`.
+- [x] ISBN que no tiene 13 dígitos, o título/autor vacío → 400 `ProblemDetail`.
+- [x] Consultar un libro por id → 200; si no existe → 404 `ProblemDetail`.
 Tareas:
-- [ ] T-01 Migración de la tabla de libros.
-- [ ] T-02 Entidad `Libro`, repositorio y `CatalogoService.registrarLibro` / `obtenerLibro`.
-- [ ] T-03 Endpoints `POST /libros` y `GET /libros/{id}` + manejo de errores.
+- [x] T-01 Migración de la tabla de libros (`V1__catalogo_libros.sql`, ISBN `VARCHAR(13)` + `uk_libro_isbn`).
+- [x] T-02 Entidad `Libro`, repositorio y `CatalogoService.registrarLibro` / `obtenerLibro`.
+- [x] T-03 Endpoints `POST /libros` y `GET /libros/{id}` + manejo de errores.
 Evidencia:
-- Comando: `./mvnw verify` → resultado: …
-- Revisión: `gentle-ai review` → resultado: …
-- Pruebas nuevas: …
-- PR: …
+- RED: `./mvnw test` → 15 pruebas nuevas fallan por la razón correcta (404 sin endpoint,
+  `UnsupportedOperation` en el servicio). Antes, `ddl-auto=validate` detectó que `CHAR(13)` no
+  coincidía con el mapeo `String`; se cambió a `VARCHAR(13)`.
+- Comando: `./mvnw verify` → resultado: BUILD SUCCESS, 20 pruebas, 0 fallos, 0 errores (2026-11-16,
+  tras las correcciones de la revisión).
+- Revisión: `gentle-ai review` (lentes risk, resilience, reliability) → resultado: **approved**, sin
+  bloqueos; 1 WARNING y 4 SUGGESTION, todas corregidas:
+  - R1-001, R3-broad-integrity-catch, R4-dive-cause-dropped: el `catch` convertía cualquier
+    `DataIntegrityViolationException` en 409 y perdía la causa → ahora solo traduce la violación de
+    `uk_libro_isbn`, conserva la causa y propaga las demás.
+  - R3-size-boundary-untested: faltaba probar el límite de 255 → prueba nueva.
+  - R3-fixed-isbn-shared-db: ISBN fijos en base compartida → ISBN único por prueba.
+  - La revisión del candidato ya corregido fue **omitida por decisión del equipo** (consentimiento
+    declinado); el "approved" corresponde al candidato previo a las correcciones.
+- Pruebas nuevas:
+  - `CatalogoServiceTest`: `debeRegistrarLibroCuandoElIsbnNoExiste`,
+    `debeLanzarIsbnDuplicadoCuandoElIsbnYaExiste`,
+    `debeLanzarIsbnDuplicadoConservandoLaCausaCuandoLaBaseRechazaElIsbnRepetido`,
+    `debePropagarLaViolacionCuandoLaBaseRechazaOtraRestriccion`, `debeDevolverLibroCuandoElIdExiste`,
+    `debeLanzarLibroNoEncontradoCuandoElIdNoExiste`.
+  - `LibroControllerTest` (MockMvc + Postgres Testcontainers): `debeResponder201ConUbicacionCuandoLosDatosSonValidos`,
+    `debeResponder409CuandoElIsbnYaExiste`, `debeResponder409CuandoLaBaseRechazaUnIsbnRepetidoEnUnaCarrera`,
+    `debeResponder400CuandoElIsbnNoTiene13Digitos` (5 casos), `debeResponder400CuandoElTituloEstaVacio`,
+    `debeResponder400CuandoElAutorEstaVacio`, `debeResponder400CuandoElTituloSuperaLos255Caracteres`,
+    `debeDevolverLibroCuandoExiste`, `debeResponder404CuandoElLibroNoExiste`.
+- PR: pendiente (rama `U-01/B-01-alta-libro`, sin commit todavía).
 
 ### B-02 · Listado y búsqueda de libros — estado: pendiente
 Criterios:
@@ -115,8 +137,12 @@ Evidencia:
 
 ## Avance y siguiente paso
 - 2026-11-16: unidad aprobada; creado este documento.
-- Siguiente: mergear `chore/configuracion-base` a `main`, crear la rama `U-01/B-01-alta-libro` desde
-  `main` y correr `/bolt` para B-01, confirmando antes el supuesto S-1.
+- 2026-11-16: `chore/configuracion-base` mergeada a `main`; S-1 resuelto; B-01 construido en
+  `U-01/B-01-alta-libro` y en revisión.
+- Para el revisor: `spring.mvc.problemdetails.enabled=true` es global, así que cambia a `ProblemDetail` el
+  formato de todos los errores de MVC (los 400 de validación salen de ahí). `CatalogoService` importa
+  `org.hibernate.exception.ConstraintViolationException` para reconocer `uk_libro_isbn`.
+- Siguiente: ✔ del revisor humano de B-01; después, `/bolt` para B-02.
 
 ## Despliegue
 - Cómo se despliega: por definir.

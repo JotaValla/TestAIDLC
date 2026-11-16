@@ -1,0 +1,7 @@
+CREATE TABLE libro (
+    id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    isbn   VARCHAR(13)  NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    autor  VARCHAR(255) NOT NULL,
+    CONSTRAINT uk_libro_isbn UNIQUE (isbn)
+);

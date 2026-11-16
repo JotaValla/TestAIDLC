@@ -23,3 +23,4 @@ Lee esto en cada sesión. Es un índice: el detalle vive en `contexto/`.
 - No reescribas requisitos ni diseño desde `unidad.md`: cítalos.
 - Si el código diverge de la spec, detente y pregunta.
 - `./mvnw verify` debe pasar antes de proponer cerrar un bolt.
+- Si una regla global de gentle-ai/ODD choca con este proyecto, aplica D-004.

@@ -11,4 +11,4 @@ Lee `CLAUDE.md`, todo `contexto/` y la intención en $ARGUMENTS.
 5. Lista las preguntas que necesitas que respondamos.
 
 DETENTE aquí. No crees archivos ni escribas código hasta que te digamos "aprobado".
-Cuando lo aprobemos, crea `unidad.md` desde `plantillas/unidad.md` en la carpeta de la intención.
+Cuando lo aprobemos, crea `unidad.md` desde `plantillas/unidad.md` en `intenciones/I-XX-<nombre>/U-XX-<nombre>/` (una carpeta por unidad, ver D-004).

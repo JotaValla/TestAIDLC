@@ -26,4 +26,4 @@ com.jotavalla.testworkflow
 
 ## Git
 - Una rama por bolt: `U-01/B-01-alta-libro`.
-- Mensaje: `[U-01/B-01] descripción`.
+- Mensaje (Conventional Commits, ver D-004): `feat(U-01/B-01): descripción` para bolts y `chore: descripción` para tareas pequeñas.
